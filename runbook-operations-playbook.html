@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RUNBOOK — IT Operations Playbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Source+Code+Pro:wght@300;400;500;600&family=Fraunces:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#faf9f7;--s1:#ffffff;--s2:#f3f1ee;--s3:#e8e5df;--s4:#d4d0c8;
+--acc:#c05621;--acc2:#dd6b20;--accbg:#fef3e2;
+--green:#16a34a;--greenbg:#f0fdf4;--red:#dc2626;--redbg:#fef2f2;
+--blue:#2563eb;--bluebg:#eff6ff;--yellow:#ca8a04;--yellowbg:#fefce8;
+--purple:#7c3aed;--purplebg:#f5f3ff;
+--t1:#1c1917;--t2:#57534e;--t3:#a8a29e;--bdr:#e7e5e4;
+--fd:'Fraunces',serif;--fb:'Instrument Sans',sans-serif;--fm:'Source Code Pro',monospace;
+--shadow:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+--shadow-lg:0 4px 12px rgba(0,0,0,0.08);
+}
+html{height:100%}
+body{background:var(--bg);color:var(--t1);font-family:var(--fb);font-size:14px;line-height:1.6;height:100%;overflow:hidden}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
+button{cursor:pointer;font-family:var(--fb)}
+input,select,textarea{font-family:var(--fb);background:var(--s1);border:1px solid var(--bdr);color:var(--t1);padding:0.5rem 0.65rem;font-size:0.8rem;border-radius:6px;outline:none;transition:border-color 0.2s}
+input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(192,86,33,0.08)}
+textarea{resize:vertical;min-height:60px;line-height:1.6}
+
+.app{display:grid;grid-template-rows:52px 1fr;grid-template-columns:300px 1fr;height:100vh}
+
+/* TOPBAR */
+.top{grid-column:1/-1;background:var(--s1);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 1.25rem;gap:1rem;box-shadow:var(--shadow)}
+.logo{font-family:var(--fd);font-weight:800;font-size:1.05rem;color:var(--acc);letter-spacing:-0.01em;display:flex;align-items:center;gap:0.5rem}
+.logo svg{width:20px;height:20px;color:var(--acc)}
+.logo span{color:var(--t2);font-weight:400;font-family:var(--fb);font-size:0.75rem;letter-spacing:0.04em}
+.sep{width:1px;height:22px;background:var(--bdr)}
+.search-box{position:relative;flex:1;max-width:400px}
+.search-box input{width:100%;padding-left:2rem;font-size:0.8rem}
+.search-box::before{content:'⌕';position:absolute;left:0.65rem;top:50%;transform:translateY(-50%);color:var(--t3);font-size:0.85rem}
+.btn{padding:0.4rem 0.85rem;font-size:0.75rem;font-weight:600;border:1px solid var(--bdr);border-radius:6px;background:var(--s1);color:var(--t2);transition:all 0.15s;display:inline-flex;align-items:center;gap:0.35rem}
+.btn:hover{border-color:var(--s4);background:var(--s2);color:var(--t1)}
+.btn-pri{background:var(--acc);color:#fff;border-color:var(--acc)}.btn-pri:hover{background:var(--acc2)}
+.btn-sm{padding:0.3rem 0.6rem;font-size:0.7rem}
+.btn-red{border-color:rgba(220,38,38,0.3);color:var(--red)}.btn-red:hover{background:var(--redbg)}
+.tb-right{margin-left:auto;display:flex;gap:0.4rem;align-items:center}
+.tb-count{font-family:var(--fm);font-size:0.65rem;color:var(--t3)}
+
+/* SIDEBAR */
+.side{background:var(--s1);border-right:1px solid var(--bdr);overflow-y:auto;display:flex;flex-direction:column}
+.side-section{padding:0.75rem;border-bottom:1px solid var(--bdr)}
+.side-title{font-size:0.6rem;font-weight:700;color:var(--t3);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.5rem}
+.cat-filter{display:flex;flex-wrap:wrap;gap:0.25rem}
+.cat-btn{padding:0.2rem 0.55rem;font-size:0.65rem;font-weight:600;border:1px solid var(--bdr);border-radius:4px;background:var(--s1);color:var(--t3);transition:all 0.15s}
+.cat-btn:hover{border-color:var(--acc);color:var(--acc)}
+.cat-btn.active{background:var(--accbg);border-color:var(--acc);color:var(--acc)}
+.rb-list{flex:1;overflow-y:auto;padding:0.5rem}
+.rb-card{padding:0.6rem 0.75rem;border:1px solid var(--bdr);border-radius:6px;margin-bottom:0.4rem;cursor:pointer;transition:all 0.15s;background:var(--s1)}
+.rb-card:hover{border-color:var(--acc);box-shadow:var(--shadow)}
+.rb-card.active{border-color:var(--acc);background:var(--accbg);box-shadow:0 0 0 2px rgba(192,86,33,0.1)}
+.rb-card-title{font-weight:700;font-size:0.8rem;color:var(--t1);margin-bottom:0.15rem;display:flex;align-items:center;gap:0.35rem}
+.rb-card-meta{display:flex;gap:0.5rem;font-size:0.6rem;color:var(--t3);align-items:center}
+.sev{display:inline-block;padding:0.1rem 0.4rem;font-size:0.55rem;font-weight:700;border-radius:3px;letter-spacing:0.04em}
+.sev-crit{background:var(--redbg);color:var(--red);border:1px solid rgba(220,38,38,0.2)}
+.sev-high{background:#fff1f2;color:#e11d48;border:1px solid rgba(225,29,72,0.2)}
+.sev-med{background:var(--yellowbg);color:var(--yellow);border:1px solid rgba(202,138,4,0.2)}
+.sev-low{background:var(--bluebg);color:var(--blue);border:1px solid rgba(37,99,235,0.2)}
+.sev-info{background:var(--purplebg);color:var(--purple);border:1px solid rgba(124,58,237,0.2)}
+.cat-tag{display:inline-block;padding:0.08rem 0.35rem;font-size:0.5rem;font-weight:600;border-radius:3px;background:var(--s2);border:1px solid var(--bdr);color:var(--t3)}
+
+/* MAIN */
+.main{overflow-y:auto;padding:1.5rem 2rem;background:var(--bg)}
+.main-empty{display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;color:var(--t3)}
+.main-empty h2{font-family:var(--fd);font-size:1.4rem;color:var(--t2);margin-bottom:0.3rem}
+.main-empty p{font-size:0.8rem}
+
+/* Runbook view */
+.rb-header{margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--bdr)}
+.rb-title-edit{font-family:var(--fd);font-size:1.6rem;font-weight:800;color:var(--t1);border:none;background:none;outline:none;width:100%;padding:0;line-height:1.3;letter-spacing:-0.01em}
+.rb-title-edit:focus{border-bottom:2px solid var(--acc)}
+.rb-meta-row{display:flex;gap:0.75rem;align-items:center;margin-top:0.5rem;flex-wrap:wrap}
+.rb-meta-row select,.rb-meta-row input{font-size:0.7rem;padding:0.3rem 0.5rem;border-radius:4px}
+.meta-label{font-size:0.6rem;font-weight:600;color:var(--t3);letter-spacing:0.04em}
+.rb-desc{width:100%;border:1px solid var(--bdr);border-radius:6px;padding:0.6rem;font-size:0.8rem;margin-top:0.75rem;background:var(--s1);min-height:44px}
+
+/* Steps */
+.steps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;margin-top:1.5rem}
+.steps-title{font-family:var(--fd);font-size:1rem;font-weight:700;color:var(--t1)}
+.step{background:var(--s1);border:1px solid var(--bdr);border-radius:8px;margin-bottom:0.5rem;overflow:hidden;box-shadow:var(--shadow);transition:border-color 0.2s}
+.step:hover{border-color:var(--s4)}
+.step-head{display:flex;align-items:flex-start;gap:0.6rem;padding:0.75rem 0.85rem;cursor:pointer;user-select:none}
+.step-num{width:26px;height:26px;border-radius:6px;background:var(--accbg);color:var(--acc);font-family:var(--fd);font-weight:800;font-size:0.75rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(192,86,33,0.15)}
+.step.done .step-num{background:var(--greenbg);color:var(--green);border-color:rgba(22,163,74,0.2)}
+.step-content{flex:1}
+.step-title-input{font-weight:700;font-size:0.85rem;color:var(--t1);border:none;background:none;outline:none;width:100%;padding:0}
+.step-title-input:focus{border-bottom:1px solid var(--acc)}
+.step-check{width:20px;height:20px;border-radius:5px;border:2px solid var(--s4);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;flex-shrink:0;font-size:0.7rem;color:transparent;margin-top:2px}
+.step-check:hover{border-color:var(--green)}
+.step.done .step-check{background:var(--green);border-color:var(--green);color:#fff}
+.step-actions{display:flex;gap:0.25rem;flex-shrink:0}
+.step-actions button{width:22px;height:22px;border:none;background:none;color:var(--t3);font-size:0.7rem;border-radius:4px;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.step-actions button:hover{background:var(--s2);color:var(--t1)}
+.step-actions .del-btn:hover{background:var(--redbg);color:var(--red)}
+.step-body{padding:0 0.85rem 0.75rem;padding-left:calc(0.85rem + 26px + 0.6rem);display:none}
+.step.open .step-body{display:block}
+.step-body textarea{width:100%;font-size:0.75rem;border-radius:5px;min-height:50px}
+.step-body .step-meta{display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap}
+.step-type{padding:0.15rem 0.45rem;font-size:0.55rem;font-weight:600;border-radius:3px;cursor:pointer;transition:all 0.15s;border:1px solid var(--bdr);background:var(--s1);color:var(--t3)}
+.step-type.active{background:var(--accbg);border-color:var(--acc);color:var(--acc)}
+.step-type:hover{border-color:var(--acc)}
+
+/* Warn/note/tip boxes */
+.callout{border-radius:6px;padding:0.5rem 0.65rem;margin-top:0.5rem;font-size:0.7rem;line-height:1.5;display:flex;gap:0.4rem;align-items:flex-start}
+.callout-warn{background:var(--yellowbg);border:1px solid rgba(202,138,4,0.2);color:#92400e}
+.callout-danger{background:var(--redbg);border:1px solid rgba(220,38,38,0.2);color:#991b1b}
+.callout-info{background:var(--bluebg);border:1px solid rgba(37,99,235,0.2);color:#1e40af}
+.callout-tip{background:var(--greenbg);border:1px solid rgba(22,163,74,0.2);color:#166534}
+.callout textarea{flex:1;background:transparent;border:none;font-size:0.7rem;color:inherit;outline:none;resize:none;min-height:20px;font-family:var(--fb);line-height:1.5}
+
+/* Code block */
+.code-block{background:#1e1e2e;border-radius:6px;padding:0.6rem 0.75rem;margin-top:0.5rem;position:relative}
+.code-block textarea{width:100%;background:transparent;border:none;color:#cdd6f4;font-family:var(--fm);font-size:0.7rem;outline:none;resize:vertical;min-height:40px;line-height:1.5}
+.code-lang{position:absolute;top:0.35rem;right:0.5rem;font-family:var(--fm);font-size:0.5rem;color:#585b70;letter-spacing:0.05em}
+
+/* Export modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.modal-bg.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--bdr);border-radius:10px;width:90vw;max-width:700px;max-height:80vh;overflow:hidden;box-shadow:var(--shadow-lg)}
+.modal-h{padding:0.75rem 1rem;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center}
+.modal-h h3{font-family:var(--fd);font-size:0.85rem;color:var(--t1)}
+.modal-x{background:none;border:1px solid var(--bdr);width:28px;height:28px;border-radius:6px;color:var(--t3);font-size:0.8rem;display:flex;align-items:center;justify-content:center}
+.modal-x:hover{color:var(--red);border-color:var(--red);background:var(--redbg)}
+.modal-b{padding:1rem;overflow-y:auto;max-height:calc(80vh - 52px)}
+.modal-b pre{background:var(--s2);border:1px solid var(--bdr);border-radius:6px;padding:0.85rem;font-family:var(--fm);font-size:0.65rem;line-height:1.6;color:var(--t2);overflow-x:auto;white-space:pre-wrap}
+.ex-tabs{display:flex;gap:0.25rem;margin-bottom:0.6rem}
+.ex-tab{padding:0.3rem 0.7rem;font-size:0.65rem;font-weight:600;border:1px solid var(--bdr);border-radius:5px;background:var(--s1);color:var(--t3);transition:all 0.15s}
+.ex-tab.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+
+/* Print styles */
+@media print{.side,.top{display:none}.app{display:block}.main{padding:0.5in}}
+@media(max-width:800px){.app{grid-template-columns:1fr}.side{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg>RUNBOOK<span>Operations Playbook</span></div>
+    <div class="sep"></div>
+    <div class="search-box"><input type="text" id="searchInput" placeholder="Search runbooks..." oninput="filterRunbooks()"></div>
+    <div class="tb-right">
+      <button class="btn btn-pri" onclick="newRunbook()">+ New Runbook</button>
+      <button class="btn" onclick="openExport()">Export</button>
+      <button class="btn" onclick="importRunbooks()">Import</button>
+      <span class="tb-count" id="totalCount">0 runbooks</span>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="side-section">
+      <div class="side-title">Categories</div>
+      <div class="cat-filter" id="catFilter">
+        <button class="cat-btn active" data-cat="all" onclick="filterCat('all',this)">All</button>
+        <button class="cat-btn" data-cat="incident" onclick="filterCat('incident',this)">Incident Response</button>
+        <button class="cat-btn" data-cat="maintenance" onclick="filterCat('maintenance',this)">Maintenance</button>
+        <button class="cat-btn" data-cat="provisioning" onclick="filterCat('provisioning',this)">Provisioning</button>
+        <button class="cat-btn" data-cat="security" onclick="filterCat('security',this)">Security</button>
+        <button class="cat-btn" data-cat="backup" onclick="filterCat('backup',this)">Backup & DR</button>
+        <button class="cat-btn" data-cat="network" onclick="filterCat('network',this)">Network</button>
+        <button class="cat-btn" data-cat="monitoring" onclick="filterCat('monitoring',this)">Monitoring</button>
+      </div>
+    </div>
+    <div class="side-section" style="display:flex;justify-content:space-between;align-items:center">
+      <div class="side-title" style="margin-bottom:0">Runbooks</div>
+      <button class="btn btn-sm" onclick="loadTemplates()">Load Templates</button>
+    </div>
+    <div class="rb-list" id="rbList"></div>
+  </div>
+
+  <div class="main" id="mainPanel">
+    <div class="main-empty" id="emptyState">
+      <h2>RUNBOOK</h2>
+      <p>Create a new runbook or load templates to get started</p>
+    </div>
+    <div id="rbEditor" style="display:none"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="exportModal">
+  <div class="modal">
+    <div class="modal-h"><h3>Export Runbook</h3><button class="modal-x" onclick="closeExport()">✕</button></div>
+    <div class="modal-b">
+      <div class="ex-tabs">
+        <button class="ex-tab on" onclick="genExport('markdown',this)">Markdown</button>
+        <button class="ex-tab" onclick="genExport('json',this)">JSON</button>
+        <button class="ex-tab" onclick="genExport('checklist',this)">Checklist</button>
+      </div>
+      <pre id="exportContent"></pre>
+      <div style="margin-top:0.6rem;display:flex;gap:0.4rem">
+        <button class="btn btn-pri" onclick="copyExport()">Copy</button>
+        <button class="btn" onclick="dlExport()">Download</button>
+        <button class="btn" onclick="window.print()">Print</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+
+<script>
+let runbooks = [];
+let activeId = null;
+let activeCat = 'all';
+let searchTerm = '';
+let curExportType = 'markdown';
+
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+function save() { localStorage.setItem('runbook_data', JSON.stringify(runbooks)); }
+function load() { const d = localStorage.getItem('runbook_data'); if (d) runbooks = JSON.parse(d); }
+
+function newRunbook() {
+  const rb = {
+    id: genId(), title: 'New Runbook', description: '',
+    category: 'maintenance', severity: 'med', author: 'M. Keith',
+    created: new Date().toISOString().split('T')[0],
+    updated: new Date().toISOString().split('T')[0],
+    tags: [], estimatedTime: '15 min',
+    steps: [{ id: genId(), title: 'Step 1', instructions: '', type: 'action', done: false, code: '', codeLanguage: 'bash', calloutType: '', calloutText: '' }]
+  };
+  runbooks.unshift(rb);
+  save();
+  renderList();
+  selectRunbook(rb.id);
+}
+
+function deleteRunbook(id) {
+  if (!confirm('Delete this runbook?')) return;
+  runbooks = runbooks.filter(r => r.id !== id);
+  if (activeId === id) { activeId = null; showEmpty(); }
+  save(); renderList();
+}
+
+function selectRunbook(id) {
+  activeId = id;
+  document.querySelectorAll('.rb-card').forEach(c => c.classList.remove('active'));
+  const card = document.querySelector(`.rb-card[data-id="${id}"]`);
+  if (card) card.classList.add('active');
+  renderEditor();
+}
+
+function showEmpty() {
+  document.getElementById('emptyState').style.display = 'flex';
+  document.getElementById('rbEditor').style.display = 'none';
+}
+
+function renderList() {
+  const list = document.getElementById('rbList');
+  let filtered = runbooks;
+  if (activeCat !== 'all') filtered = filtered.filter(r => r.category === activeCat);
+  if (searchTerm) {
+    const s = searchTerm.toLowerCase();
+    filtered = filtered.filter(r => r.title.toLowerCase().includes(s) || r.description.toLowerCase().includes(s) || r.tags.some(t => t.toLowerCase().includes(s)));
+  }
+  list.innerHTML = filtered.map(r => {
+    const sevClass = { crit: 'sev-crit', high: 'sev-high', med: 'sev-med', low: 'sev-low', info: 'sev-info' }[r.severity] || 'sev-med';
+    const progress = r.steps.length ? Math.round(r.steps.filter(s => s.done).length / r.steps.length * 100) : 0;
+    return `<div class="rb-card ${activeId === r.id ? 'active' : ''}" data-id="${r.id}" onclick="selectRunbook('${r.id}')">
+      <div class="rb-card-title"><span class="sev ${sevClass}">${r.severity.toUpperCase()}</span>${r.title}</div>
+      <div class="rb-card-meta">
+        <span class="cat-tag">${r.category}</span>
+        <span>${r.steps.length} steps</span>
+        <span>${progress}% done</span>
+        <span>${r.estimatedTime}</span>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('totalCount').textContent = `${runbooks.length} runbooks`;
+}
+
+function filterCat(cat, btn) {
+  activeCat = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
+}
+
+function filterRunbooks() {
+  searchTerm = document.getElementById('searchInput').value;
+  renderList();
+}
+
+function renderEditor() {
+  const rb = runbooks.find(r => r.id === activeId);
+  if (!rb) { showEmpty(); return; }
+  document.getElementById('emptyState').style.display = 'none';
+  const ed = document.getElementById('rbEditor');
+  ed.style.display = 'block';
+
+  const sevOpts = ['crit', 'high', 'med', 'low', 'info'].map(s => `<option value="${s}" ${rb.severity === s ? 'selected' : ''}>${s.toUpperCase()}</option>`).join('');
+  const catOpts = ['incident', 'maintenance', 'provisioning', 'security', 'backup', 'network', 'monitoring'].map(c => `<option value="${c}" ${rb.category === c ? 'selected' : ''}>${c}</option>`).join('');
+
+  ed.innerHTML = `
+    <div class="rb-header">
+      <input class="rb-title-edit" value="${rb.title}" onchange="updRb('title',this.value)" placeholder="Runbook Title">
+      <div class="rb-meta-row">
+        <div><span class="meta-label">Severity</span><br><select onchange="updRb('severity',this.value)">${sevOpts}</select></div>
+        <div><span class="meta-label">Category</span><br><select onchange="updRb('category',this.value)">${catOpts}</select></div>
+        <div><span class="meta-label">Est. Time</span><br><input value="${rb.estimatedTime}" style="width:80px" onchange="updRb('estimatedTime',this.value)"></div>
+        <div><span class="meta-label">Author</span><br><input value="${rb.author}" style="width:100px" onchange="updRb('author',this.value)"></div>
+        <div><span class="meta-label">Updated</span><br><span style="font-size:0.7rem;color:var(--t3)">${rb.updated}</span></div>
+        <button class="btn btn-red btn-sm" style="margin-left:auto" onclick="deleteRunbook('${rb.id}')">Delete</button>
+      </div>
+      <textarea class="rb-desc" placeholder="Brief description of this runbook's purpose and scope..." onchange="updRb('description',this.value)">${rb.description}</textarea>
+      <div style="margin-top:0.5rem">
+        <span class="meta-label">Tags</span>
+        <input value="${rb.tags.join(', ')}" placeholder="Comma-separated tags..." style="width:100%;margin-top:0.2rem" onchange="updRb('tags',this.value.split(',').map(t=>t.trim()).filter(Boolean))">
+      </div>
+    </div>
+
+    <div class="steps-header">
+      <div class="steps-title">Procedure Steps (${rb.steps.filter(s => s.done).length}/${rb.steps.length} complete)</div>
+      <div style="display:flex;gap:0.35rem">
+        <button class="btn btn-sm" onclick="resetSteps()">Reset All</button>
+        <button class="btn btn-pri btn-sm" onclick="addStep()">+ Add Step</button>
+      </div>
+    </div>
+    <div id="stepsList">${rb.steps.map((s, i) => renderStep(s, i)).join('')}</div>
+  `;
+}
+
+function renderStep(step, idx) {
+  const rb = runbooks.find(r => r.id === activeId);
+  const types = ['action', 'verification', 'decision', 'documentation', 'communication'];
+  return `
+    <div class="step ${step.done ? 'done' : ''} ${step._open ? 'open' : ''}" data-sid="${step.id}">
+      <div class="step-head" onclick="toggleStep('${step.id}')">
+        <div class="step-check" onclick="event.stopPropagation();toggleDone('${step.id}')">${step.done ? '✓' : ''}</div>
+        <div class="step-num">${idx + 1}</div>
+        <div class="step-content">
+          <input class="step-title-input" value="${step.title}" onclick="event.stopPropagation()" onchange="updStep('${step.id}','title',this.value)" placeholder="Step title...">
+        </div>
+        <div class="step-actions">
+          <button onclick="event.stopPropagation();moveStep('${step.id}',-1)" title="Move up">↑</button>
+          <button onclick="event.stopPropagation();moveStep('${step.id}',1)" title="Move down">↓</button>
+          <button onclick="event.stopPropagation();dupStep('${step.id}')" title="Duplicate">⧉</button>
+          <button class="del-btn" onclick="event.stopPropagation();delStep('${step.id}')" title="Delete">✕</button>
+        </div>
+      </div>
+      <div class="step-body">
+        <textarea placeholder="Detailed instructions for this step..." onchange="updStep('${step.id}','instructions',this.value)">${step.instructions}</textarea>
+        
+        <div class="step-meta">
+          <span style="font-size:0.6rem;color:var(--t3);margin-right:0.25rem">Type:</span>
+          ${types.map(t => `<span class="step-type ${step.type === t ? 'active' : ''}" onclick="updStep('${step.id}','type','${t}')">${t}</span>`).join('')}
+        </div>
+
+        <div style="margin-top:0.6rem;display:flex;gap:0.3rem;flex-wrap:wrap">
+          <button class="btn btn-sm" onclick="toggleCallout('${step.id}','warn')">⚠ Warning</button>
+          <button class="btn btn-sm" onclick="toggleCallout('${step.id}','danger')">🔴 Danger</button>
+          <button class="btn btn-sm" onclick="toggleCallout('${step.id}','info')">ℹ Note</button>
+          <button class="btn btn-sm" onclick="toggleCallout('${step.id}','tip')">💡 Tip</button>
+          <button class="btn btn-sm" onclick="toggleCode('${step.id}')">{ } Code</button>
+        </div>
+
+        ${step.calloutType ? `
+          <div class="callout callout-${step.calloutType}">
+            <span>${{ warn: '⚠', danger: '🔴', info: 'ℹ️', tip: '💡' }[step.calloutType]}</span>
+            <textarea onchange="updStep('${step.id}','calloutText',this.value)" placeholder="Callout text...">${step.calloutText || ''}</textarea>
+          </div>
+        ` : ''}
+
+        ${step.code !== undefined && step.code !== '' || step._showCode ? `
+          <div class="code-block">
+            <span class="code-lang">${step.codeLanguage || 'bash'}</span>
+            <select style="position:absolute;top:0.25rem;right:3rem;font-size:0.5rem;padding:0.1rem 0.3rem;background:#313244;border:1px solid #45475a;color:#cdd6f4;border-radius:3px" onchange="updStep('${step.id}','codeLanguage',this.value)">
+              ${['bash', 'powershell', 'python', 'sql', 'cmd', 'json', 'yaml'].map(l => `<option value="${l}" ${(step.codeLanguage || 'bash') === l ? 'selected' : ''}>${l}</option>`).join('')}
+            </select>
+            <textarea onchange="updStep('${step.id}','code',this.value)" placeholder="# Enter command or script...">${step.code || ''}</textarea>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function updRb(key, val) {
+  const rb = runbooks.find(r => r.id === activeId);
+  if (!rb) return;
+  rb[key] = val;
+  rb.updated = new Date().toISOString().split('T')[0];
+  save();
+  if (key === 'category' || key === 'severity' || key === 'title') renderList();
+}
+
+function updStep(sid, key, val) {
+  const rb = runbooks.find(r => r.id === activeId);
+  if (!rb) return;
+  const step = rb.steps.find(s => s.id === sid);
+  if (!step) return;
+  step[key] = val;
+  rb.updated = new Date().toISOString().split('T')[0];
+  save();
+  if (key === 'type' || key === 'calloutType') renderEditor();
+}
+
+function toggleStep(sid) {
+  const rb = runbooks.find(r => r.id === activeId);
+  if (!rb) return;
+  const step = rb.steps.find(s => s.id === sid);
+  if (step) { step._open = !step._open; renderEditor(); }
+}
+
+function toggleDone(sid) {
+  const rb = runbooks.find(r => r.id === activeId);
+  if (!rb) return;
+  const step = rb.steps.find(s => s.id === sid);
+  if (step) { step.done = !step.done; save(); renderEditor(); renderList(); }
+}
+
+function addStep() {
+  const rb = runbooks.find(r => r.id === activeId);
+  if (!rb) return;
+  rb.steps.push({ id: genId(), title: `Step ${rb.steps.length + 1}`, instructions: '', type: 'action', done: false, code: '', codeLanguage: 'bash', calloutType: '', calloutText: '', _open: true });
+  save(); renderEditor();
+}
+
+function delStep(sid) {
+  const rb = runbooks.find(r => r.id === activeId);
+  if (!rb || rb.steps.length <= 1) return;
+  rb.steps = rb.steps.filter(s => s.id !== sid);
+  save(); renderEditor();
+}
+
+function moveStep(sid, dir) {
+  const rb = runbooks.find(r => r.id === activeId);
+  if (!rb) return;
+  const idx = rb.steps.findIndex(s => s.id === sid);
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= rb.steps.length) return;
+  [rb.steps[idx], rb.steps[newIdx]] = [rb.steps[newIdx], rb.steps[idx]];
+  save(); renderEditor();
+}
+
+function dupStep(sid) {
+  const rb = runbooks.find(r => r.id === activeId);
+  if (!rb) return;
+  const idx = rb.steps.findIndex(s => s.id === sid);
+  const orig = rb.steps[idx];
+  const copy = { ...orig, id: genId(), done: false, title: orig.title + ' (copy)' };
+  rb.steps.splice(idx + 1, 0, copy);
+  save(); renderEditor();
+}
+
+function resetSteps() {
+  const rb = runbooks.find(r => r.id === activeId);
+  if (!rb) return;
+  rb.steps.forEach(s => s.done = false);
+  save(); renderEditor(); renderList();
+}
+
+function toggleCallout(sid, type) {
+  const rb = runbooks.find(r => r.id === activeId);
+  const step = rb?.steps.find(s => s.id === sid);
+  if (!step) return;
+  step.calloutType = step.calloutType === type ? '' : type;
+  if (!step.calloutType) step.calloutText = '';
+  save(); renderEditor();
+}
+
+function toggleCode(sid) {
+  const rb = runbooks.find(r => r.id === activeId);
+  const step = rb?.steps.find(s => s.id === sid);
+  if (!step) return;
+  step._showCode = !step._showCode;
+  if (!step._showCode) { step.code = ''; }
+  renderEditor();
+}
+
+// TEMPLATES
+function loadTemplates() {
+  const templates = [
+    {
+      title: 'Server Unresponsive — Initial Triage', category: 'incident', severity: 'high', author: 'M. Keith',
+      description: 'First-response procedure when a production server becomes unresponsive. Follow steps in order and document all findings.',
+      tags: ['incident', 'server', 'triage', 'production'], estimatedTime: '20 min',
+      steps: [
+        { title: 'Verify the alert', instructions: 'Confirm the server is actually down — check monitoring dashboard, try ping, attempt SSH/RDP.', type: 'verification', code: 'ping -c 4 <SERVER_IP>\nssh admin@<SERVER_IP>\ncurl -I https://<SERVER_FQDN>', codeLanguage: 'bash', calloutType: 'info', calloutText: 'If the server responds to ping but services are down, skip to Step 4 (service-level troubleshooting).' },
+        { title: 'Check cloud/hypervisor console', instructions: 'Log into Azure Portal / Proxmox / vSphere and verify the VM state. Look for resource exhaustion or host issues.', type: 'action', code: 'az vm show --resource-group <RG> --name <VM> --show-details', codeLanguage: 'bash' },
+        { title: 'Attempt graceful restart', instructions: 'If the VM is in a hung state, perform a graceful restart from the hypervisor console first. Avoid hard reset unless necessary.', type: 'action', calloutType: 'warn', calloutText: 'Document the exact time of restart for the incident timeline. Check if any critical jobs were running.' },
+        { title: 'Verify service recovery', instructions: 'After restart, verify all critical services are running. Check application health endpoints.', type: 'verification', code: 'systemctl status nginx\nsystemctl status postgresql\ncurl -f http://localhost/health', codeLanguage: 'bash' },
+        { title: 'Review logs for root cause', instructions: 'Check system logs, application logs, and resource utilization history to identify what caused the outage.', type: 'action', code: 'journalctl --since "1 hour ago" --priority err\ndmesg | tail -50\ndf -h\nfree -m', codeLanguage: 'bash' },
+        { title: 'Notify stakeholders', instructions: 'Send status update to affected teams via Teams and email. Include: what happened, current status, ETA for full resolution.', type: 'communication' },
+        { title: 'Document incident', instructions: 'Create incident record with timeline, root cause (if known), actions taken, and follow-up items.', type: 'documentation', calloutType: 'tip', calloutText: 'Use the IR template in the shared IT drive. Tag with severity and affected service.' },
+      ]
+    },
+    {
+      title: 'New Employee M365 Provisioning', category: 'provisioning', severity: 'low', author: 'M. Keith',
+      description: 'Standard operating procedure for provisioning a new employee account in Microsoft 365 and related systems.',
+      tags: ['onboarding', 'M365', 'Entra ID', 'provisioning'], estimatedTime: '30 min',
+      steps: [
+        { title: 'Receive onboarding request', instructions: 'Verify the request includes: full name, department, start date, manager, job title, and required distribution lists.', type: 'verification', calloutType: 'info', calloutText: 'Request should come from HR via the IT Request Form on SharePoint.' },
+        { title: 'Create Entra ID account', instructions: 'Create user in Microsoft Entra ID admin center with appropriate naming convention.', type: 'action', code: 'New-MgUser -DisplayName "First Last" -UserPrincipalName "flast@domain.com" -PasswordProfile @{Password="TempP@ss123!"; ForceChangePasswordNextSignIn=$true} -AccountEnabled $true -Department "Dept" -JobTitle "Title"', codeLanguage: 'powershell' },
+        { title: 'Assign licenses', instructions: 'Assign M365 Business Premium license (or appropriate SKU). Verify license availability before assigning.', type: 'action', code: 'Set-MgUserLicense -UserId "flast@domain.com" -AddLicenses @{SkuId="<LICENSE_SKU_ID>"} -RemoveLicenses @()', codeLanguage: 'powershell' },
+        { title: 'Add to security groups', instructions: 'Add user to department security group, distribution lists, and Teams groups per the onboarding checklist.', type: 'action' },
+        { title: 'Configure email signature', instructions: 'Set up standardized email signature using the organization template.', type: 'action' },
+        { title: 'Send welcome email', instructions: 'Send the IT Welcome Pack email with login instructions, VPN setup guide, and IT support contact info.', type: 'communication', calloutType: 'tip', calloutText: 'CC the manager so they know the account is ready.' },
+        { title: 'Document in asset tracker', instructions: 'Add new account to the IT asset/account tracker spreadsheet with creation date, licenses assigned, and equipment issued.', type: 'documentation' },
+      ]
+    },
+    {
+      title: 'SSL Certificate Renewal', category: 'maintenance', severity: 'med', author: 'M. Keith',
+      description: 'Procedure for renewing Let\'s Encrypt SSL certificates using win-acme on Windows servers.',
+      tags: ['SSL', 'certificates', 'Let\'s Encrypt', 'win-acme', 'IIS'], estimatedTime: '15 min',
+      steps: [
+        { title: 'Check certificate expiry', instructions: 'Verify current certificate expiry date and which domains are covered.', type: 'verification', code: 'wacs.exe --list', codeLanguage: 'cmd', calloutType: 'warn', calloutText: 'Certificates expire after 90 days. Renew at least 2 weeks before expiry.' },
+        { title: 'Run renewal check', instructions: 'Run win-acme in renewal mode. It will automatically check and renew any certificates expiring within 55 days.', type: 'action', code: 'wacs.exe --renew --force', codeLanguage: 'cmd' },
+        { title: 'Verify new certificate', instructions: 'Confirm the new certificate is installed and bound correctly in IIS.', type: 'verification', code: 'Get-ChildItem Cert:\\LocalMachine\\WebHosting | Where-Object { $_.Subject -like "*domain.com*" } | Format-List Subject, NotAfter, Thumbprint', codeLanguage: 'powershell' },
+        { title: 'Test HTTPS endpoint', instructions: 'Hit the site externally and verify the certificate chain is valid with no errors.', type: 'verification', code: 'curl -vI https://connect.ncacc.org 2>&1 | grep -E "expire|subject|issuer"', codeLanguage: 'bash' },
+        { title: 'Restart dependent services if needed', instructions: 'If certificate binding changed, restart the application service via NSSM.', type: 'action', code: 'nssm restart NCACCContactsPortal', codeLanguage: 'cmd', calloutType: 'info', calloutText: 'The portal runs as NCACCContactsPortal service via NSSM. Check logs\\stderr.log after restart.' },
+      ]
+    },
+    {
+      title: 'Phishing Incident Response', category: 'security', severity: 'crit', author: 'M. Keith',
+      description: 'Response procedure when a user reports a suspected phishing email or a phishing click is detected by Barracuda/Defender.',
+      tags: ['phishing', 'incident', 'security', 'email', 'Barracuda'], estimatedTime: '45 min',
+      steps: [
+        { title: 'Contain — Block sender domain', instructions: 'Immediately block the sending domain/IP in Barracuda Email Security Gateway and Entra ID.', type: 'action', calloutType: 'danger', calloutText: 'If credentials were entered on a phishing page, immediately reset the user\'s password and revoke all active sessions. Do not wait.' },
+        { title: 'Assess scope', instructions: 'Search mail logs for other recipients of the same message. Identify all affected users.', type: 'action', code: 'Get-MessageTrace -SenderAddress "attacker@evil.com" -StartDate (Get-Date).AddDays(-7) -EndDate (Get-Date) | Select RecipientAddress, Status, MessageId', codeLanguage: 'powershell' },
+        { title: 'Quarantine and purge', instructions: 'Purge the phishing message from all mailboxes using compliance search.', type: 'action', code: 'New-ComplianceSearch -Name "PhishPurge" -ExchangeLocation All -ContentMatchQuery \'subject:"<SUBJECT>" AND from:"<SENDER>"\'\nStart-ComplianceSearch -Identity "PhishPurge"', codeLanguage: 'powershell' },
+        { title: 'Check for credential compromise', instructions: 'Review Entra ID sign-in logs for the affected user(s). Look for unusual locations, devices, or MFA challenges.', type: 'verification' },
+        { title: 'Reset credentials if exposed', instructions: 'Force password reset and revoke sessions for any user who clicked the link or entered credentials.', type: 'action', code: 'Revoke-MgUserSignInSession -UserId "user@domain.com"\nUpdate-MgUser -UserId "user@domain.com" -PasswordProfile @{ForceChangePasswordNextSignIn=$true}', codeLanguage: 'powershell' },
+        { title: 'Notify affected users', instructions: 'Send targeted notification to users who received the email. Include guidance on what to look for and what action to take.', type: 'communication' },
+        { title: 'Post-incident report', instructions: 'Complete the incident report template. Include: attack vector, IOCs, affected users count, response timeline, and prevention recommendations.', type: 'documentation', calloutType: 'tip', calloutText: 'Add the sender domain and any IOCs to the Barracuda block list and Threat Intel Feed Aggregator for ongoing monitoring.' },
+      ]
+    },
+    {
+      title: 'Azure VM Backup Verification', category: 'backup', severity: 'med', author: 'M. Keith',
+      description: 'Weekly verification that Azure VM backups are completing successfully for all production workloads.',
+      tags: ['Azure', 'backup', 'disaster recovery', 'verification'], estimatedTime: '10 min',
+      steps: [
+        { title: 'Check Azure Backup dashboard', instructions: 'Navigate to Recovery Services Vault in Azure Portal. Review the backup jobs dashboard for the last 7 days.', type: 'verification' },
+        { title: 'Verify specific VMs', instructions: 'Confirm each production VM has a recent successful backup point.', type: 'verification', code: 'az backup item list --resource-group <RG> --vault-name <VAULT> --backup-management-type AzureIaasVM --output table', codeLanguage: 'bash' },
+        { title: 'Check retention compliance', instructions: 'Verify backup retention policies match the documented DR requirements (daily: 30 days, weekly: 12 weeks, monthly: 12 months).', type: 'verification' },
+        { title: 'Log verification result', instructions: 'Record the verification result in the weekly ops log. Note any failures or warnings.', type: 'documentation', calloutType: 'warn', calloutText: 'If any backup failed, escalate immediately — do not wait for the next weekly check.' },
+      ]
+    },
+    {
+      title: 'Network Switch VLAN Configuration', category: 'network', severity: 'med', author: 'M. Keith',
+      description: 'Procedure for adding or modifying VLANs on managed network switches.',
+      tags: ['network', 'VLAN', 'switch', 'configuration'], estimatedTime: '20 min',
+      steps: [
+        { title: 'Document current config', instructions: 'Before making changes, capture the current running configuration.', type: 'documentation', code: 'show running-config\nshow vlan brief\ncopy running-config startup-config', codeLanguage: 'bash', calloutType: 'warn', calloutText: 'Always save the current config to a backup file before making VLAN changes. One wrong trunk config can take down the network.' },
+        { title: 'Create VLAN', instructions: 'Create the new VLAN with an appropriate name and ID per the network documentation.', type: 'action', code: 'configure terminal\nvlan <VLAN_ID>\n name <VLAN_NAME>\n exit', codeLanguage: 'bash' },
+        { title: 'Assign access ports', instructions: 'Configure the physical ports that should be members of the new VLAN.', type: 'action', code: 'interface range gi1/0/10 - 15\n switchport mode access\n switchport access vlan <VLAN_ID>\n no shutdown\n exit', codeLanguage: 'bash' },
+        { title: 'Configure trunk ports', instructions: 'Ensure trunk ports are carrying the new VLAN if needed for inter-switch communication.', type: 'action', code: 'interface gi1/0/1\n switchport trunk allowed vlan add <VLAN_ID>\n exit', codeLanguage: 'bash' },
+        { title: 'Verify VLAN propagation', instructions: 'Confirm the VLAN exists on all participating switches and ports are correctly assigned.', type: 'verification', code: 'show vlan id <VLAN_ID>\nshow interfaces trunk\nshow mac address-table vlan <VLAN_ID>', codeLanguage: 'bash' },
+        { title: 'Test connectivity', instructions: 'Connect a test device to an access port on the new VLAN. Verify IP assignment and routing.', type: 'verification' },
+        { title: 'Save and document', instructions: 'Save the running configuration and update the network documentation / topology diagram.', type: 'documentation', code: 'copy running-config startup-config', codeLanguage: 'bash' },
+      ]
+    },
+  ];
+
+  templates.forEach(t => {
+    const existing = runbooks.find(r => r.title === t.title);
+    if (existing) return;
+    runbooks.push({
+      ...t, id: genId(),
+      created: new Date().toISOString().split('T')[0],
+      updated: new Date().toISOString().split('T')[0],
+      steps: t.steps.map(s => ({ ...s, id: genId(), done: false, calloutType: s.calloutType || '', calloutText: s.calloutText || '', code: s.code || '', codeLanguage: s.codeLanguage || 'bash', _open: false }))
+    });
+  });
+  save(); renderList();
+  if (!activeId && runbooks.length) selectRunbook(runbooks[0].id);
+}
+
+// EXPORT
+function openExport() {
+  if (!activeId) { alert('Select a runbook first'); return; }
+  document.getElementById('exportModal').classList.add('open');
+  genExport('markdown', document.querySelector('.ex-tab.on'));
+}
+function closeExport() { document.getElementById('exportModal').classList.remove('open'); }
+
+function genExport(type, btn) {
+  curExportType = type;
+  document.querySelectorAll('.ex-tab').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on');
+  const rb = runbooks.find(r => r.id === activeId);
+  if (!rb) return;
+  const el = document.getElementById('exportContent');
+
+  if (type === 'markdown') {
+    let md = `# ${rb.title}\n\n`;
+    md += `**Severity:** ${rb.severity.toUpperCase()} | **Category:** ${rb.category} | **Est. Time:** ${rb.estimatedTime}\n`;
+    md += `**Author:** ${rb.author} | **Updated:** ${rb.updated}\n\n`;
+    if (rb.description) md += `> ${rb.description}\n\n`;
+    if (rb.tags.length) md += `**Tags:** ${rb.tags.map(t => '`' + t + '`').join(' ')}\n\n`;
+    md += `---\n\n## Procedure\n\n`;
+    rb.steps.forEach((s, i) => {
+      md += `### Step ${i + 1}: ${s.title}\n\n`;
+      if (s.instructions) md += `${s.instructions}\n\n`;
+      if (s.calloutType && s.calloutText) {
+        const icons = { warn: '⚠️ **Warning:**', danger: '🔴 **Danger:**', info: 'ℹ️ **Note:**', tip: '💡 **Tip:**' };
+        md += `> ${icons[s.calloutType]} ${s.calloutText}\n\n`;
+      }
+      if (s.code) md += '```' + (s.codeLanguage || 'bash') + '\n' + s.code + '\n```\n\n';
+    });
+    el.textContent = md;
+  } else if (type === 'json') {
+    el.textContent = JSON.stringify({
+      ...rb,
+      steps: rb.steps.map(s => ({ title: s.title, instructions: s.instructions, type: s.type, done: s.done, code: s.code, codeLanguage: s.codeLanguage, calloutType: s.calloutType, calloutText: s.calloutText }))
+    }, null, 2);
+  } else if (type === 'checklist') {
+    let cl = `RUNBOOK CHECKLIST: ${rb.title}\n${'='.repeat(50)}\n`;
+    cl += `Severity: ${rb.severity.toUpperCase()} | Category: ${rb.category}\n`;
+    cl += `Author: ${rb.author} | Est. Time: ${rb.estimatedTime}\n\n`;
+    rb.steps.forEach((s, i) => {
+      cl += `[${s.done ? 'X' : ' '}] Step ${i + 1}: ${s.title}\n`;
+      if (s.instructions) cl += `    ${s.instructions.split('\n').join('\n    ')}\n`;
+      if (s.calloutType) cl += `    ⚠ ${s.calloutText}\n`;
+      cl += '\n';
+    });
+    el.textContent = cl;
+  }
+}
+
+function copyExport() { navigator.clipboard?.writeText(document.getElementById('exportContent').textContent).then(() => alert('Copied!')); }
+function dlExport() {
+  const t = document.getElementById('exportContent').textContent;
+  const rb = runbooks.find(r => r.id === activeId);
+  const ext = { markdown: 'md', json: 'json', checklist: 'txt' }[curExportType];
+  const blob = new Blob([t], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `runbook-${(rb?.title || 'export').toLowerCase().replace(/\s+/g, '-')}.${ext}`;
+  a.click();
+}
+
+function importRunbooks() { document.getElementById('importFile').click(); }
+function handleImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (Array.isArray(data)) {
+        data.forEach(rb => { rb.id = genId(); rb.steps?.forEach(s => s.id = genId()); runbooks.push(rb); });
+      } else if (data.title) {
+        data.id = genId(); data.steps?.forEach(s => s.id = genId()); runbooks.push(data);
+      }
+      save(); renderList();
+      alert(`Imported successfully`);
+    } catch { alert('Invalid JSON file'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// KEYBOARD
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeExport();
+  if (e.ctrlKey && e.key === 'n') { e.preventDefault(); newRunbook(); }
+});
+
+// INIT
+load();
+renderList();
+if (runbooks.length && !activeId) selectRunbook(runbooks[0].id);
+</script>
+</body>
+</html>
